@@ -1,36 +1,36 @@
 package com.epam.orderapi.model;
 
+import com.epam.core.command.UpdateOrderStatus;
+import com.epam.core.event.OrderCreatedEvent;
+import com.epam.core.event.OrderPlacedEvent;
 import com.epam.orderapi.command.AddItemCommand;
 import com.epam.orderapi.command.NewOrderCommand;
 import com.epam.orderapi.command.PlaceOrderCommand;
-import com.epam.orderapi.event.OrderCreatedEvent;
-import com.epam.orderapi.event.OrderPlacedEvent;
-import com.epam.orderapi.query.GetOrderQuery;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.modelling.command.AggregateCreationPolicy;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.modelling.command.CreationPolicy;
-import org.axonframework.queryhandling.QueryHandler;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.springframework.context.event.EventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.CollectionTable;
-import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import java.util.ArrayList;
+import java.lang.invoke.MethodHandles;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Aggregate
 @Entity(name = "orders")
 public class Order {
+
+    private transient static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     @Id
     @AggregateIdentifier
@@ -66,6 +66,12 @@ public class Order {
     public void placeOrder(PlaceOrderCommand placeOrderCommand){
         this.status = "PLACED";
         AggregateLifecycle.apply(new OrderPlacedEvent(id));
+    }
+
+    @CommandHandler
+    public void updateStatus(UpdateOrderStatus updateOrderStatus) {
+        LOG.info("Order {} status change {} -> {}", id, status, updateOrderStatus.getStatus());
+        this.status = updateOrderStatus.getStatus();
     }
 
     public String getId() {
