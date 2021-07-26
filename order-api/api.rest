@@ -1,0 +1,22 @@
+### Create order
+
+POST http://localhost:8080/api/order
+
+> {%
+    client.global.set("orderId", response.body.id);
+%}
+
+### Add item
+
+POST http://localhost:8080/api/order/{{orderId}}
+Content-Type: application/json
+
+{ "item" : "dummy" }
+
+### Get order
+
+GET http://localhost:8080/api/order/{{orderId}}
+
+### Placer order
+
+POST http://localhost:8080/api/order/{{orderId}}/place
