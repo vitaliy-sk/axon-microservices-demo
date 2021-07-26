@@ -13,10 +13,17 @@ Content-Type: application/json
 
 { "item" : "dummy" }
 
+### Add item
+
+POST http://localhost:8080/api/order/{{orderId}}
+Content-Type: application/json
+
+{ "item" : "fail" }
+
 ### Get order
 
 GET http://localhost:8080/api/order/{{orderId}}
 
-### Placer order
+### Place order
 
 POST http://localhost:8080/api/order/{{orderId}}/place

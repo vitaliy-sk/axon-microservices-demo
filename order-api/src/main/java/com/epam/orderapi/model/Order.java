@@ -70,6 +70,12 @@ public class Order {
 
     @CommandHandler
     public void updateStatus(UpdateOrderStatus updateOrderStatus) {
+
+        if (items.contains("fail")) {
+            LOG.info("Simulate error");
+            throw new RuntimeException("Smth happened wrong");
+        }
+
         LOG.info("Order {} status change {} -> {}", id, status, updateOrderStatus.getStatus());
         this.status = updateOrderStatus.getStatus();
     }

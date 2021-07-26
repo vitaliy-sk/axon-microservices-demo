@@ -4,6 +4,9 @@ import com.epam.core.command.UpdateOrderStatus;
 import com.epam.core.event.OrderPlacedEvent;
 import com.epam.fullfilment.command.PrepareShippingCommand;
 import com.epam.fullfilment.event.ShippingArrivedEvent;
+import org.axonframework.commandhandling.CommandCallback;
+import org.axonframework.commandhandling.CommandMessage;
+import org.axonframework.commandhandling.CommandResultMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.SagaLifecycle;
@@ -41,8 +44,15 @@ public class FulfillmentSaga {
 
     @SagaEventHandler(associationProperty = "orderId")
     public void handle(ShippingArrivedEvent event) {
-        commandGateway.send(new UpdateOrderStatus(event.getOrderId(), "SHIPPED"));
-        SagaLifecycle.end();
+        commandGateway.send(new UpdateOrderStatus(event.getOrderId(), "SHIPPED"),
+                (commandMessage, commandResultMessage) -> {
+                    if (commandResultMessage.isExceptional()) {
+                        // Rollback shipment
+                        LOG.error("Need to do compensate action for rollback !!! ");
+                    }
+                    SagaLifecycle.end();
+                });
+
     }
 
 }
